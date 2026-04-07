@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
@@ -6,6 +6,14 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=100)
     is_teacher: bool = False
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_bcrypt_limit(cls, value: str) -> str:
+        # bcrypt suporta no maximo 72 bytes no segredo.
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Senha muito longa para o algoritmo atual (maximo: 72 bytes).")
+        return value
 
 
 class LoginRequest(BaseModel):

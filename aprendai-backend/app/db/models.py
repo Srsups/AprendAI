@@ -80,9 +80,10 @@ class StudyPlan(Base):
 
     @property
     def avg_rating(self) -> float | None:
-        if not self.ratings:
+        ratings = self.__dict__.get("ratings")
+        if not ratings:
             return None
-        return round(sum(r.rating for r in self.ratings) / len(self.ratings), 1)
+        return round(sum(r.rating for r in ratings) / len(ratings), 1)
 
     def __repr__(self) -> str:
         return f"<StudyPlan '{self.subject}' ({self.num_lessons} aulas)>"

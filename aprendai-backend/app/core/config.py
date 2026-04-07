@@ -12,18 +12,16 @@ class Settings(BaseSettings):
     app_env: str = "development"
     app_port: int = 8000
 
-    # CORS — no .env use: CORS_ORIGINS_RAW=http://localhost:3000,http://127.0.0.1:3000
+    # CORS
     cors_origins_raw: str = "http://localhost:3000"
 
     # Banco de dados
-    # Desenvolvimento : sqlite+aiosqlite:///./aprendai.db
-    # Produção        : postgresql+asyncpg://user:pass@host:5432/aprendai
-    database_url: str = "sqlite+aiosqlite:///./aprendai.db"
-    
-    # JWT
-    jwt_secret_key: str = "05a1964bf58b2624e66dd10a24b04b82d62a61c89d14191fd79316d57f5d2536"
-    jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 60 * 24 * 7  # 7 dias
+    database_url: str = "sqlite+aiosqlite:///./edumotor.db"
+
+    # JWT  ← estas três estavam faltando
+    secret_key: str = "05a1964bf58b2624e66dd10a24b04b82d62a61c89d14191fd79316d57f5d2536"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24 * 7  # 7 dias
 
     @property
     def cors_origins(self) -> list[str]:

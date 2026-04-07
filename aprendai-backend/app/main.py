@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from app.db.database import create_tables
-from app.api.routes import plan, lesson, assessment
+from app.api.routes import plan, lesson, assessment, auth
 from app.api.routes import plans_db, lessons_db, assessment_db
 
 logging.basicConfig(
@@ -98,6 +98,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(plan.router,       prefix="/api/v1")
 app.include_router(lesson.router,     prefix="/api/v1")
 app.include_router(assessment.router, prefix="/api/v1")
+app.include_router(auth.router,       prefix="/api/v1")
 
 # Endpoints com persistência
 app.include_router(plans_db.router,      prefix="/api/v1")

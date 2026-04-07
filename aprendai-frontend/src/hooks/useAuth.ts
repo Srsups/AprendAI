@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
-import { saveToken, removeToken, getToken } from '@/lib/auth'
-import type { User } from '@/lib/types'
+import { saveToken, removeToken } from '@/lib/auth'
 
 export function useAuth() {
   const router = useRouter()
@@ -17,7 +16,7 @@ export function useAuth() {
     try {
       const res = await authApi.login({ email, password })
       saveToken(res.data.access_token)
-      router.push('/')
+      router.push('/dashboard')          // ← era '/'
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao fazer login.')
     } finally {
@@ -26,17 +25,14 @@ export function useAuth() {
   }
 
   const register = async (
-    name: string,
-    email: string,
-    password: string,
-    is_teacher = false
+    name: string, email: string, password: string, is_teacher = false
   ) => {
     setLoading(true)
     setError(null)
     try {
       const res = await authApi.register({ name, email, password, is_teacher })
       saveToken(res.data.access_token)
-      router.push('/')
+      router.push('/dashboard')          // ← era '/'
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao criar conta.')
     } finally {
@@ -46,7 +42,7 @@ export function useAuth() {
 
   const logout = () => {
     removeToken()
-    router.push('/login')
+    router.push('/')                     // ← vai para landing após sair
   }
 
   return { login, register, logout, loading, error }

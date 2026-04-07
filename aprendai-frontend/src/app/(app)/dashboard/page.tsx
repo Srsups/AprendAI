@@ -157,17 +157,40 @@ const fadeIn = {
 }
 
 // ─── Cursor personalizado ──────────────────────────────────────────────────────
+const INTERACTIVE_CURSOR_SELECTOR =
+  'a, button, input, textarea, select, [role="button"], [contenteditable="true"], [data-slot="button"], [data-cursor-native="true"]'
+
+function isInteractiveCursorTarget(target: Element | null) {
+  return !!target?.closest(INTERACTIVE_CURSOR_SELECTOR)
+}
+
 function CustomCursor() {
   const x = useMotionValue(-100)
   const y = useMotionValue(-100)
   const springX = useSpring(x, { stiffness: 200, damping: 28 })
   const springY = useSpring(y, { stiffness: 200, damping: 28 })
+  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
-    const move = (e: MouseEvent) => { x.set(e.clientX); y.set(e.clientY) }
+    const move = (e: MouseEvent) => {
+      x.set(e.clientX)
+      y.set(e.clientY)
+      setVisible(!isInteractiveCursorTarget(document.elementFromPoint(e.clientX, e.clientY)))
+    }
+
+    const reset = () => setVisible(true)
+
     window.addEventListener('mousemove', move)
-    return () => window.removeEventListener('mousemove', move)
+    window.addEventListener('blur', reset)
+    return () => {
+      window.removeEventListener('mousemove', move)
+      window.removeEventListener('blur', reset)
+    }
   }, [])
+
+  if (!visible) {
+    return null
+  }
 
   return (
     <>
@@ -235,18 +258,19 @@ export default function HomePage() {
         }
       `}</style>
 
-      <CustomCursor />
-      <GradientOrbs />
-      <ParticleCanvas />
+      <div className="cursor-none">
+        <CustomCursor />
+        <GradientOrbs />
+        <ParticleCanvas />
 
-      {/* Conteúdo */}
-      <div className="relative z-10 mx-auto max-w-3xl px-6 py-20">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="flex flex-col items-center gap-10"
-        >
+        {/* Conteúdo */}
+        <div className="relative z-10 mx-auto max-w-3xl px-6 py-20">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="flex flex-col items-center gap-10"
+          >
           {/* Badge */}
           <motion.div variants={fadeUp}>
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 backdrop-blur-sm">
@@ -324,7 +348,8 @@ export default function HomePage() {
           <motion.div variants={fadeIn} className="w-full">
             <TrendingList onSelect={(subject) => setTrendingPrompt(`Quero aprender sobre ${subject}`)} />
           </motion.div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </>
   )

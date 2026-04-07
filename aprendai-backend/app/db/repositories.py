@@ -73,6 +73,7 @@ class StudyPlanRepository:
 
     async def get_by_id(self, plan_id: str, load_lessons: bool = False) -> StudyPlan | None:
         q = select(StudyPlan).where(StudyPlan.id == plan_id)
+        q = q.options(selectinload(StudyPlan.ratings))
         if load_lessons:
             q = q.options(selectinload(StudyPlan.lessons))
         result = await self.db.execute(q)
@@ -81,6 +82,7 @@ class StudyPlanRepository:
     async def list_by_user(self, user_id: str) -> list[StudyPlan]:
         result = await self.db.execute(
             select(StudyPlan)
+            .options(selectinload(StudyPlan.ratings))
             .where(StudyPlan.user_id == user_id)
             .order_by(StudyPlan.created_at.desc())
         )

@@ -121,6 +121,7 @@ export default function SearchInput({ externalPrompt }: Props) {
           <Button
             onClick={handleGenerate}
             disabled={generating || !prompt.trim()}
+            data-cursor-native="true"
             className="gap-2 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
           >
             {generating ? (
