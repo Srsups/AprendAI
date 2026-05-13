@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Playfair_Display, DM_Sans, DM_Mono } from 'next/font/google'
 import Providers from '@/providers/providers'
 import { Toaster } from '@/components/ui/sonner'
-import './globals.css'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],

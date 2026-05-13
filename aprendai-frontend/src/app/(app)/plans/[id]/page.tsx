@@ -11,6 +11,8 @@ import LessonContent from '@/components/plans/LessonContent'
 import StarRating from '@/components/shared/StarRating'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import ExportModal from '@/components/plans/ExportModal'
+import { Download } from 'lucide-react'
 import type { StudyPlanDetail, LessonContent as LessonContentType } from '@/lib/types'
 
 export default function PlanDetailPage() {
@@ -20,6 +22,7 @@ export default function PlanDetailPage() {
 
   const [activeLesson, setActiveLesson] = useState(1)
   const [lessonContent, setLessonContent] = useState<LessonContentType | null>(null)
+  const [showExport, setShowExport] = useState(false)
 
   const { data: plan, isLoading } = useQuery({
     queryKey: ['plan', id],
@@ -111,15 +114,24 @@ export default function PlanDetailPage() {
           />
 
           {lessonContent && (
-            <div className="flex justify-between border-t border-border px-6 py-4">
+            <div className="flex items-center justify-between border-t border-border px-6 py-4">
               <Button
-                variant="ghost"
-                size="sm"
+                variant="ghost" size="sm"
                 disabled={activeLesson <= 1}
                 onClick={() => loadLesson(activeLesson - 1)}
               >
                 ← Anterior
               </Button>
+
+              <Button
+                variant="outline" size="sm"
+                className="gap-2 border-border text-muted-foreground hover:text-primary hover:border-primary/40"
+                onClick={() => setShowExport(true)}
+              >
+                <Download size={13} />
+                Exportar aula
+              </Button>
+
               <Button
                 variant={activeLesson < plan.num_lessons ? 'default' : 'ghost'}
                 size="sm"
@@ -132,6 +144,15 @@ export default function PlanDetailPage() {
           )}
         </div>
       </div>
+      {showExport && lessonContent && (
+        <ExportModal
+          planId={id}
+          lessonNumber={activeLesson}
+          lessonTitle={lessonContent.title}
+          isTeacher={false}  // substituir por: user?.is_teacher ?? false (após adicionar query do /me)
+          onClose={() => setShowExport(false)}
+        />
+      )}
     </div>
   )
 }

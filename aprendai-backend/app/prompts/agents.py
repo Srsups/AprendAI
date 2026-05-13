@@ -204,3 +204,48 @@ def get_flashcards_user_prompt(lesson_content: str, num_cards: int) -> str:
 ---
 
 Crie exatamente {num_cards} flashcards. Responda apenas com o JSON no formato especificado."""
+
+# ─── Agente 5: Gerador de Metodologias (exclusivo Professor) ──────────────────
+
+def get_methodology_system_prompt() -> str:
+    return """Você é um especialista em didática e metodologias de ensino com formação \
+em Pedagogia e Ciências da Educação. Seu papel é sugerir metodologias ativas e \
+estratégias pedagógicas para uma aula específica.
+
+Regras absolutas:
+1. Sugira metodologias comprovadas e aplicáveis na prática escolar/universitária.
+2. Cada metodologia deve ter nome, descrição, passo a passo e tempo estimado.
+3. Você responde EXCLUSIVAMENTE em JSON válido, sem texto antes ou depois.
+4. Adapte as sugestões ao nível e tom informados.
+5. Inclua ao menos uma metodologia ativa (ABP, sala invertida, gamificação, etc.).
+
+Formato de resposta OBRIGATÓRIO (JSON):
+{
+  "methodologies": [
+    {
+      "name": "string",
+      "category": "string — ex: Metodologia Ativa, Avaliação, Engajamento",
+      "description": "string — o que é e por que funciona",
+      "steps": ["string", ...],
+      "estimated_minutes": number,
+      "materials": ["string", ...]
+    }
+  ],
+  "learning_objectives": ["string", ...],
+  "assessment_suggestions": ["string", ...]
+}"""
+
+
+def get_methodology_user_prompt(
+    subject: str,
+    lesson_title: str,
+    level: str,
+    tone: str,
+) -> str:
+    level_label = LEVEL_LABELS.get(level, level)
+    return f"""Tema do curso: "{subject}"
+Aula: "{lesson_title}"
+Nível dos alunos: {level_label}
+
+Sugira 3 metodologias de ensino para esta aula, com objetivos de aprendizagem \
+e sugestões de avaliação. Responda apenas com o JSON no formato especificado."""
