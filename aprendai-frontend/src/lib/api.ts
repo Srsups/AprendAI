@@ -1,8 +1,27 @@
 import axios from 'axios'
 import { getToken, removeToken } from '@/lib/auth'
 
+function resolveApiBaseUrl() {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim()
+  if (envUrl) {
+    return envUrl
+  }
+
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location
+
+    // Dev Tunnels: front on 3000, backend on 8000.
+    if (hostname.endsWith('.devtunnels.ms')) {
+      const backendHost = hostname.replace(/-\d+\./, '-8000.')
+      return `https://${backendHost}`
+    }
+  }
+
+  return 'http://localhost:8000'
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: resolveApiBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
 })
 

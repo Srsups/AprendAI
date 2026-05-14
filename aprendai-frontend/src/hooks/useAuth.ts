@@ -5,6 +5,32 @@ import { useRouter } from 'next/navigation'
 import { authApi } from '@/lib/api'
 import { saveToken, removeToken } from '@/lib/auth'
 
+function getApiErrorMessage(err: any, fallback: string) {
+  const detail = err?.response?.data?.detail
+
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail
+  }
+
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0]
+    if (typeof first === 'string') {
+      return first
+    }
+    if (first?.msg) {
+      return first.msg
+    }
+  }
+
+  if (typeof err?.message === 'string' && err.message) {
+    if (err.message === 'Network Error') {
+      return 'Não foi possível conectar ao servidor. Verifique se o backend está em execução.'
+    }
+  }
+
+  return fallback
+}
+
 export function useAuth() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -18,7 +44,7 @@ export function useAuth() {
       saveToken(res.data.access_token)
       router.push('/dashboard')          // ← era '/'
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao fazer login.')
+      setError(getApiErrorMessage(err, 'Erro ao fazer login.'))
     } finally {
       setLoading(false)
     }
@@ -34,7 +60,7 @@ export function useAuth() {
       saveToken(res.data.access_token)
       router.push('/dashboard')          // ← era '/'
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao criar conta.')
+      setError(getApiErrorMessage(err, 'Erro ao criar conta.'))
     } finally {
       setLoading(false)
     }

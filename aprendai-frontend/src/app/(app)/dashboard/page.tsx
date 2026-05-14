@@ -286,7 +286,16 @@ export default function HomePage() {
 
           {/* Título */}
           <motion.div variants={fadeUp} className="text-center">
-            <h1 className="font-serif text-5xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-7xl">
+            <h1
+              className="font-serif text-5xl font-bold leading-[1.08] tracking-tight md:text-6xl lg:text-6xl"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                paddingRight: '0.25rem',
+              }}
+            >
               Aprenda{' '}
               <em
                 className="italic text-primary"
@@ -294,8 +303,7 @@ export default function HomePage() {
               >
                 qualquer coisa
               </em>
-              <br />
-              <span className="text-foreground/90">de forma estruturada</span>
+              <span className="block text-foreground/90">de forma estruturada</span>
             </h1>
           </motion.div>
 

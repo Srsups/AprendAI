@@ -1,5 +1,7 @@
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -19,17 +21,27 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./edumotor.db"
 
     # JWT  ← estas três estavam faltando
-    secret_key: str = "05a1964bf58b2624e66dd10a24b04b82d62a61c89d14191fd79316d57f5d2536"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60 * 24 * 7  # 7 dias
+    secret_key: str = Field(
+        default="05a1964bf58b2624e66dd10a24b04b82d62a61c89d14191fd79316d57f5d2536",
+        validation_alias=AliasChoices("JWT_SECRET_KEY", "SECRET_KEY"),
+    )
+    algorithm: str = Field(
+        default="HS256",
+        validation_alias=AliasChoices("JWT_ALGORITHM", "ALGORITHM"),
+    )
+    access_token_expire_minutes: int = Field(
+        default=60 * 24 * 7,
+        validation_alias=AliasChoices("JWT_EXPIRE_MINUTES", "ACCESS_TOKEN_EXPIRE_MINUTES"),
+    )
 
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.cors_origins_raw.split(",") if o.strip()]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(Path(__file__).resolve().parents[3] / ".env"),
         env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 

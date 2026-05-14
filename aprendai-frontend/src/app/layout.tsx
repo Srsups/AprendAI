@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import './globals.css'
 import { Playfair_Display, DM_Sans, DM_Mono } from 'next/font/google'
 import Providers from '@/providers/providers'
 import { Toaster } from '@/components/ui/sonner'
