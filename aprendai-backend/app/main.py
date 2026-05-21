@@ -11,11 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
-from app.db.database import create_tables
 from app.api.routes import plan, lesson, assessment, auth
 from app.api.routes import plans_db, lessons_db, assessment_db
 from app.api.routes import export
 from app.api.routes import comments
+from app.api.routes import usage
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,11 +34,6 @@ async def lifespan(app: FastAPI):
     logger.info(f"  Modelo   : {settings.github_model}")
     logger.info(f"  Database : {settings.database_url}")
     logger.info("=" * 60)
-
-    # Cria tabelas no banco (idempotente — não recria se já existem)
-    await create_tables()
-    logger.info("  Tabelas do banco verificadas/criadas.")
-
     yield
     logger.info("AprendAI Backend encerrando.")
 
@@ -108,6 +103,7 @@ app.include_router(lessons_db.router,    prefix="/api/v1")
 app.include_router(assessment_db.router, prefix="/api/v1")
 app.include_router(export.router,        prefix="/api/v1")
 app.include_router(comments.router,      prefix="/api/v1")
+app.include_router(usage.router,         prefix="/api/v1")
 
 
 @app.get("/health", tags=["Sistema"])

@@ -26,12 +26,14 @@ const LESSON_OPTIONS = [4, 6, 8, 10, 12]
 
 interface Props {
   externalPrompt?:    string
+  limitReached?:      boolean   // ← novo
   onGeneratingStart?: (subject: string, numLessons: number) => void
   onGeneratingEnd?:   () => void
 }
 
 export default function SearchInput({
   externalPrompt,
+  limitReached = false,
   onGeneratingStart,
   onGeneratingEnd,
 }: Props) {
@@ -129,7 +131,7 @@ export default function SearchInput({
 
           <Button
             onClick={handleGenerate}
-            disabled={generating || !prompt.trim()}
+            disabled={generating || !prompt.trim() || limitReached}
             className="gap-2 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
           >
             {generating
@@ -142,6 +144,16 @@ export default function SearchInput({
 
       {error && (
         <p className="text-center text-sm text-destructive">{error}</p>
+      )}
+
+      {limitReached && !error && (
+        <p className="text-center text-sm text-destructive">
+          Limite do plano gratuito atingido.{' '}
+          <a href="/#planos" className="underline hover:text-primary">
+            Faça upgrade
+          </a>{' '}
+          para continuar.
+        </p>
       )}
 
       <p className="text-center font-mono text-xs text-muted-foreground">

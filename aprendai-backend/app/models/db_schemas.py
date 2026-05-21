@@ -136,3 +136,18 @@ class CommentResponse(BaseModel):
     is_own    : bool = False   # True se o comentário é do usuário logado
 
     model_config = {"from_attributes": True}
+    
+# ─── Usage ────────────────────────────────────────────────────────────────────
+
+class UsageResponse(BaseModel):
+    subscription_plan  : str
+    plan_label         : str
+    plan_description   : str
+    plans_this_month   : int
+    plans_limit        : int | None    # None = ilimitado
+    is_within_limit    : bool
+    remaining          : int | None    # None = ilimitado
+    max_lessons        : int
+    has_flashcards     : bool
+    has_export_pptx    : bool
+    has_methodology    : bool

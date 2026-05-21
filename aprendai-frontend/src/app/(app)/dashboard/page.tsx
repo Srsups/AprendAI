@@ -1,13 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import SearchInput      from '@/components/home/SearchInput'
 import TrendingList     from '@/components/home/TrendingList'
 import GeneratingLoader from '@/components/home/GeneratingLoader'
-import { usePlan }      from '@/hooks/usePlan'
-
-// ─── Partículas e orbs (reaproveitados da home) ────────────────────────────────
+import UsageIndicator   from '@/components/home/UsageIndicator'
 
 function GradientOrbs() {
   return (
@@ -23,15 +21,11 @@ function GradientOrbs() {
 }
 
 export default function DashboardPage() {
-  const [trendingPrompt, setTrendingPrompt]     = useState('')
-  const [generatingMeta, setGeneratingMeta]     = useState<{
-    subject: string
-    numLessons: number
+  const [trendingPrompt,  setTrendingPrompt]  = useState('')
+  const [generatingMeta,  setGeneratingMeta]  = useState<{
+    subject: string; numLessons: number
   } | null>(null)
-
-  // Referência para capturar os valores atuais do SearchInput antes de gerar
-  const promptRef     = useRef('')
-  const numLessonsRef = useRef(8)
+  const [limitReached, setLimitReached] = useState(false)
 
   return (
     <>
@@ -45,7 +39,6 @@ export default function DashboardPage() {
 
       <GradientOrbs />
 
-      {/* Loader de geração — cobre a tela enquanto a IA trabalha */}
       <AnimatePresence>
         {generatingMeta && (
           <GeneratingLoader
@@ -55,7 +48,7 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 space-y-14">
+      <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 space-y-10">
 
         {/* Hero */}
         <motion.div
@@ -70,27 +63,35 @@ export default function DashboardPage() {
               Motor de Aprendizado com IA
             </span>
           </div>
-
           <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight md:text-5xl">
             O que você quer
             <br />
             <em className="italic text-primary">aprender hoje?</em>
           </h1>
-
           <p className="mx-auto max-w-md text-muted-foreground leading-relaxed">
             Descreva o tema e a IA cria um plano de aulas estruturado,
             com quiz e flashcards incluídos.
           </p>
         </motion.div>
 
-        {/* Input — passa callbacks para capturar os valores antes de gerar */}
+        {/* Indicador de uso */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <UsageIndicator onLimitReached={setLimitReached} />
+        </motion.div>
+
+        {/* Input */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <SearchInput  
+          <SearchInput
             externalPrompt={trendingPrompt}
+            limitReached={limitReached}
             onGeneratingStart={(subject, numLessons) =>
               setGeneratingMeta({ subject, numLessons })
             }
@@ -102,7 +103,7 @@ export default function DashboardPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
         >
           <TrendingList
             onSelect={(subject) =>

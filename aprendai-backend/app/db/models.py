@@ -34,12 +34,13 @@ def _uuid() -> str:
 class User(Base):
     __tablename__ = "users"
 
-    id         : Mapped[str]      = mapped_column(String(36), primary_key=True, default=_uuid)
-    email      : Mapped[str]      = mapped_column(String(255), unique=True, nullable=False, index=True)
-    name       : Mapped[str]      = mapped_column(String(255), nullable=False)
-    hashed_pw  : Mapped[str]      = mapped_column(String(255), nullable=False)
-    is_teacher : Mapped[bool]     = mapped_column(Boolean, default=False)
-    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    id         :       Mapped[str]      = mapped_column(String(36), primary_key=True, default=_uuid)
+    email      :       Mapped[str]      = mapped_column(String(255), unique=True, nullable=False, index=True)
+    name       :       Mapped[str]      = mapped_column(String(255), nullable=False)
+    hashed_pw  :       Mapped[str]      = mapped_column(String(255), nullable=False)
+    is_teacher :       Mapped[bool]     = mapped_column(Boolean, default=False)
+    subscription_plan: Mapped[str]      = mapped_column(String(20), default="free", nullable=False)
+    created_at :       Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     # Relacionamentos
     plans   : Mapped[list["StudyPlan"]]   = relationship(back_populates="user", cascade="all, delete-orphan")

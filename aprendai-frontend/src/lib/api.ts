@@ -134,3 +134,7 @@ export const commentsApi = {
   delete: (planId: string, lessonNumber: number, commentId: string) =>
     api.delete(`/api/v1/plans/${planId}/lessons/${lessonNumber}/comments/${commentId}`),
 }
+
+export const usageApi = {
+  get: () => api.get('/api/v1/usage'),
+}

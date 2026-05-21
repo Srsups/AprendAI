@@ -155,3 +155,19 @@ export interface Comment {
   user      : CommentAuthor
   is_own    : boolean
 }
+
+// ─── Usage ────────────────────────────────────────────────────────────────────
+
+export interface UsageInfo {
+  subscription_plan : string
+  plan_label        : string
+  plan_description  : string
+  plans_this_month  : number
+  plans_limit       : number | null
+  is_within_limit   : boolean
+  remaining         : number | null
+  max_lessons       : number
+  has_flashcards    : boolean
+  has_export_pptx   : boolean
+  has_methodology   : boolean
+}

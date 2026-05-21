@@ -301,3 +301,25 @@ class CommentRepository:
         comment = await self.get_by_id(comment_id)
         if comment:
             await self.db.delete(comment)
+            
+# ─── UsageRepository ──────────────────────────────────────────────────────────
+
+class UsageRepository:
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def count_plans_this_month(self, user_id: str) -> int:
+        """Conta planos criados pelo usuário no mês corrente."""
+        from datetime import datetime, timezone
+        now   = datetime.now(timezone.utc)
+        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        result = await self.db.execute(
+            select(func.count(StudyPlan.id))
+            .where(
+                StudyPlan.user_id   == user_id,
+                StudyPlan.created_at >= start,
+            )
+        )
+        return result.scalar_one() or 0

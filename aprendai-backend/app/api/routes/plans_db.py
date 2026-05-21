@@ -9,6 +9,8 @@ from app.models.db_schemas import (
     StudyPlanCreate, StudyPlanResponse, StudyPlanListItem,
     ProgressUpdate, LessonSummaryDB,
 )
+from app.core.plans_config import get_limits, is_within_limit
+from app.db.repositories import StudyPlanRepository, LessonRepository, UsageRepository
 
 router = APIRouter(prefix="/plans", tags=["Planos (Persistência)"])
 
@@ -21,6 +23,17 @@ async def save_plan(
 ):
     plan_repo   = StudyPlanRepository(db)
     lesson_repo = LessonRepository(db)
+    usage_repo = UsageRepository(db)
+    plans_this_month = await usage_repo.count_plans_this_month(current_user.id)
+
+    if not is_within_limit(current_user.subscription_plan, plans_this_month):
+        limits = get_limits(current_user.subscription_plan)
+        raise HTTPException(
+            status_code=403,
+            detail=f"Limite do plano {limits['label']} atingido: "
+                f"{limits['plans_per_month']} planos/mês. "
+                f"Faça upgrade para continuar.",
+        )
 
     plan = await plan_repo.create(
         user_id=current_user.id,
