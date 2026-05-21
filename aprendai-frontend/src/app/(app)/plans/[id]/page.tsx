@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Download, BookOpen, Zap, Brain } from 'lucide-react'
+import { Download, BookOpen, Zap, Brain, MessageCircle } from 'lucide-react'
 import { plansApi, assessmentApi, authApi } from '@/lib/api'
 import { usePlan } from '@/hooks/usePlan'
 import LessonSideBar from '@/components/plans/LessonSideBar'
@@ -17,8 +17,9 @@ import StarRating      from '@/components/shared/StarRating'
 import { Button }      from '@/components/ui/button'
 import { Badge }       from '@/components/ui/badge'
 import type { StudyPlanDetail, LessonContent as LessonContentType, User } from '@/lib/types'
+import CommentsSection from '@/components/plans/CommentsSection'
 
-type Tab = 'aula' | 'quiz' | 'flashcards'
+type Tab = 'aula' | 'quiz' | 'flashcards' | 'discussao'
 
 export default function PlanDetailPage() {
   const { id }         = useParams<{ id: string }>()
@@ -78,10 +79,11 @@ export default function PlanDetailPage() {
   }
 
   const TABS = [
-    { id: 'aula' as Tab,        label: 'Aula',        icon: BookOpen },
-    { id: 'quiz' as Tab,        label: 'Quiz',        icon: Zap },
-    { id: 'flashcards' as Tab,  label: 'Flashcards',  icon: Brain },
-  ]
+  { id: 'aula'      as Tab, label: 'Aula',      icon: BookOpen      },
+  { id: 'quiz'      as Tab, label: 'Quiz',       icon: Zap           },
+  { id: 'flashcards'as Tab, label: 'Flashcards', icon: Brain         },
+  { id: 'discussao' as Tab, label: 'Discussão',  icon: MessageCircle },
+]
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
@@ -146,7 +148,7 @@ export default function PlanDetailPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  disabled={tab.id !== 'aula' && !lessonContent}
+                  disabled={(tab.id === 'quiz' || tab.id === 'flashcards') && !lessonContent}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-xs font-medium transition-all ${
                     activeTab === tab.id
                       ? 'bg-primary/10 text-primary'
@@ -194,6 +196,15 @@ export default function PlanDetailPage() {
             {activeTab === 'flashcards' && lessonContent && (
               <FlashcardsView lessonText={lessonText} />
             )}
+
+            {activeTab === 'discussao' && (
+              <CommentsSection
+                planId={id}
+                lessonNumber={activeLesson}
+                userName={user?.name ?? 'Usuário'}
+              />
+            )}
+
           </div>
 
           {/* Navegação entre aulas */}

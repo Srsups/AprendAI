@@ -123,3 +123,14 @@ export const assessmentApi = {
 }
 
 export default api
+
+export const commentsApi = {
+  list: (planId: string, lessonNumber: number) =>
+    api.get(`/api/v1/plans/${planId}/lessons/${lessonNumber}/comments`),
+
+  create: (planId: string, lessonNumber: number, content: string) =>
+    api.post(`/api/v1/plans/${planId}/lessons/${lessonNumber}/comments`, { content }),
+
+  delete: (planId: string, lessonNumber: number, commentId: string) =>
+    api.delete(`/api/v1/plans/${planId}/lessons/${lessonNumber}/comments/${commentId}`),
+}

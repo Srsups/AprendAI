@@ -112,11 +112,30 @@ function HeroSection() {
   const { scrollY } = useScroll()
   const y     = useTransform(scrollY, [0, 500], [0, 120])
   const opacity = useTransform(scrollY, [0, 400], [1, 0])
+  const [heroTitle, setHeroTitle] = useState(
+    'Transforme qualquer assunto\nem  um curso completo'
+  )
+
+  const renderTitle = () => {
+    const highlightRe = /(qualquer(?:\s+assunto)?)/i
+    return heroTitle.split('\n').map((line, i) => {
+      const parts = line.split(highlightRe)
+      return (
+        <div key={i} className="whitespace-pre-line">
+          {parts.map((part, idx) => (
+            highlightRe.test(part)
+              ? <span key={idx} className="text-primary font-serif italic">{part}</span>
+              : <span key={idx}>{part}</span>
+          ))}
+        </div>
+      )
+    })
+  }
 
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20">
       <motion.div style={{ y, opacity }}
-        className="relative z-10 mx-auto max-w-4xl text-center">
+        className="relative z-10 mx-auto max-w-6xl text-center">
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -135,15 +154,12 @@ function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="font-serif text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl"
+          style={{ textShadow: '0 0 80px rgba(200,240,96,0.3)' }}
         >
-          Transforme qualquer assunto
-          <br />
-          em um{' '}
-          <em className="italic text-primary"
-            style={{ textShadow: '0 0 80px rgba(200,240,96,0.3)' }}>
-            curso completo
-          </em>
+          {renderTitle()}
         </motion.h1>
+
+        {/* Hero title is editable in the editor; textarea removed for production */}
 
         <motion.p
           initial={{ opacity: 0, y: 24 }}

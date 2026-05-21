@@ -114,3 +114,25 @@ class TrendingItem(BaseModel):
     subject           : str
     total_generations : int
     avg_rating        : float | None
+
+# ─── Comments ─────────────────────────────────────────────────────────────────
+
+class CommentCreate(BaseModel):
+    content: str = Field(..., min_length=3, max_length=1000)
+
+
+class CommentAuthor(BaseModel):
+    id  : str
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
+class CommentResponse(BaseModel):
+    id        : str
+    content   : str
+    created_at: datetime
+    user      : CommentAuthor
+    is_own    : bool = False   # True se o comentário é do usuário logado
+
+    model_config = {"from_attributes": True}

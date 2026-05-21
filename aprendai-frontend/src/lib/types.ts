@@ -140,3 +140,18 @@ export interface TrendingItem {
   total_generations: number
   avg_rating: number | null
 }
+
+// ─── Comments ─────────────────────────────────────────────────────────────────
+
+export interface CommentAuthor {
+  id  : string
+  name: string
+}
+
+export interface Comment {
+  id        : string
+  content   : string
+  created_at: string
+  user      : CommentAuthor
+  is_own    : boolean
+}

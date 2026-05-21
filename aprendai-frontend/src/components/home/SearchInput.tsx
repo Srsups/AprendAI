@@ -25,10 +25,16 @@ const TONES: { value: ToneStyle; label: string }[] = [
 const LESSON_OPTIONS = [4, 6, 8, 10, 12]
 
 interface Props {
-  externalPrompt?: string   // ← novo
+  externalPrompt?:    string
+  onGeneratingStart?: (subject: string, numLessons: number) => void
+  onGeneratingEnd?:   () => void
 }
 
-export default function SearchInput({ externalPrompt }: Props) {
+export default function SearchInput({
+  externalPrompt,
+  onGeneratingStart,
+  onGeneratingEnd,
+}: Props) {
   const router = useRouter()
   const { generateAndSave, generating, error } = usePlan()
 
@@ -37,7 +43,6 @@ export default function SearchInput({ externalPrompt }: Props) {
   const [tone,       setTone]       = useState<ToneStyle>('academico')
   const [numLessons, setNumLessons] = useState(8)
 
-  // Sincroniza com o trending clicado na home
   useEffect(() => {
     if (externalPrompt) setPrompt(externalPrompt)
   }, [externalPrompt])
@@ -45,7 +50,16 @@ export default function SearchInput({ externalPrompt }: Props) {
   const handleGenerate = async () => {
     if (!prompt.trim()) return
     if (!isAuthenticated()) { router.push('/login'); return }
+
+    // Extrai o subject do prompt para exibir no loader
+    // (usa as primeiras palavras como preview — o backend retorna o real)
+    const preview = prompt.length > 60 ? prompt.slice(0, 57) + '…' : prompt
+    onGeneratingStart?.(preview, numLessons)
+
     const planId = await generateAndSave(prompt, numLessons, level, tone)
+
+    onGeneratingEnd?.()
+
     if (planId) router.push(`/plans/${planId}`)
   }
 
@@ -61,17 +75,16 @@ export default function SearchInput({ externalPrompt }: Props) {
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ex: Quero 8 aulas sobre a Segunda Guerra Mundial, foque nas relações políticas e tratados…"
-          className="min-h-22.5 resize-none border-0 bg-transparent p-0 text-base placeholder:italic placeholder:text-muted-foreground focus-visible:ring-0"
+          className="min-h-[90px] resize-none border-0 bg-transparent p-0 text-base placeholder:italic placeholder:text-muted-foreground focus-visible:ring-0"
         />
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <div className="flex flex-wrap gap-2">
+
             {/* Nível */}
             <div className="flex overflow-hidden rounded-lg border border-border">
               {LEVELS.map((l) => (
-                <button
-                  key={l.value}
-                  onClick={() => setLevel(l.value)}
+                <button key={l.value} onClick={() => setLevel(l.value)}
                   className={`px-3 py-1.5 text-xs font-mono transition-all ${
                     level === l.value
                       ? 'bg-primary/10 text-primary'
@@ -86,9 +99,7 @@ export default function SearchInput({ externalPrompt }: Props) {
             {/* Tom */}
             <div className="flex overflow-hidden rounded-lg border border-border">
               {TONES.map((t) => (
-                <button
-                  key={t.value}
-                  onClick={() => setTone(t.value)}
+                <button key={t.value} onClick={() => setTone(t.value)}
                   className={`px-3 py-1.5 text-xs font-mono transition-all ${
                     tone === t.value
                       ? 'bg-primary/10 text-primary'
@@ -103,9 +114,7 @@ export default function SearchInput({ externalPrompt }: Props) {
             {/* Nº aulas */}
             <div className="flex overflow-hidden rounded-lg border border-border">
               {LESSON_OPTIONS.map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setNumLessons(n)}
+                <button key={n} onClick={() => setNumLessons(n)}
                   className={`px-3 py-1.5 text-xs font-mono transition-all ${
                     numLessons === n
                       ? 'bg-primary/10 text-primary'
@@ -121,19 +130,19 @@ export default function SearchInput({ externalPrompt }: Props) {
           <Button
             onClick={handleGenerate}
             disabled={generating || !prompt.trim()}
-            data-cursor-native="true"
             className="gap-2 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            {generating ? (
-              <><Loader2 size={15} className="animate-spin" /> Gerando…</>
-            ) : (
-              <><ArrowRight size={15} /> Gerar plano</>
-            )}
+            {generating
+              ? <><Loader2 size={15} className="animate-spin" /> Gerando…</>
+              : <><ArrowRight size={15} /> Gerar plano</>
+            }
           </Button>
         </div>
       </div>
 
-      {error && <p className="text-center text-sm text-destructive">{error}</p>}
+      {error && (
+        <p className="text-center text-sm text-destructive">{error}</p>
+      )}
 
       <p className="text-center font-mono text-xs text-muted-foreground">
         ⌘ + Enter para gerar

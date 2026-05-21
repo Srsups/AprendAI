@@ -15,6 +15,7 @@ from app.db.database import create_tables
 from app.api.routes import plan, lesson, assessment, auth
 from app.api.routes import plans_db, lessons_db, assessment_db
 from app.api.routes import export
+from app.api.routes import comments
 
 logging.basicConfig(
     level=logging.INFO,
@@ -106,6 +107,7 @@ app.include_router(plans_db.router,      prefix="/api/v1")
 app.include_router(lessons_db.router,    prefix="/api/v1")
 app.include_router(assessment_db.router, prefix="/api/v1")
 app.include_router(export.router,        prefix="/api/v1")
+app.include_router(comments.router,      prefix="/api/v1")
 
 
 @app.get("/health", tags=["Sistema"])

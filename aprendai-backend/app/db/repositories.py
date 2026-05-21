@@ -10,7 +10,7 @@ from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.db.models import User, StudyPlan, Lesson, QuizAttempt, PlanRating
+from app.db.models import User, StudyPlan, Lesson, QuizAttempt, PlanRating, LessonComment
 
 
 # ─── UserRepository ───────────────────────────────────────────────────────────
@@ -266,3 +266,38 @@ class PlanRatingRepository:
             "total_ratings": row.total_ratings or 0,
             "avg_rating": round(row.avg_rating, 1) if row.avg_rating else None,
         }
+
+# ─── CommentRepository ────────────────────────────────────────────────────────
+
+class CommentRepository:
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create(self, lesson_id: str, user_id: str, content: str) -> "LessonComment":
+        from app.db.models import LessonComment
+        comment = LessonComment(lesson_id=lesson_id, user_id=user_id, content=content)
+        self.db.add(comment)
+        await self.db.flush()
+        return comment
+
+    async def list_by_lesson(self, lesson_id: str) -> list:
+        from app.db.models import LessonComment
+        result = await self.db.execute(
+            select(LessonComment)
+            .where(LessonComment.lesson_id == lesson_id)
+            .order_by(LessonComment.created_at.asc())
+        )
+        return list(result.scalars().all())
+
+    async def get_by_id(self, comment_id: str):
+        from app.db.models import LessonComment
+        result = await self.db.execute(
+            select(LessonComment).where(LessonComment.id == comment_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def delete(self, comment_id: str):
+        comment = await self.get_by_id(comment_id)
+        if comment:
+            await self.db.delete(comment)

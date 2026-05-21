@@ -45,6 +45,7 @@ class User(Base):
     plans   : Mapped[list["StudyPlan"]]   = relationship(back_populates="user", cascade="all, delete-orphan")
     ratings : Mapped[list["PlanRating"]]  = relationship(back_populates="user", cascade="all, delete-orphan")
     attempts: Mapped[list["QuizAttempt"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    comments: Mapped[list["LessonComment"]] = relationship(cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User {self.email}>"
@@ -59,12 +60,12 @@ class StudyPlan(Base):
     user_id       : Mapped[str]      = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
 
     # Dados do plano
-    subject       : Mapped[str]      = mapped_column(String(500), nullable=False)
-    original_prompt: Mapped[str]     = mapped_column(Text, nullable=False)
-    num_lessons   : Mapped[int]      = mapped_column(Integer, nullable=False)
-    level         : Mapped[str]      = mapped_column(String(50), nullable=False)   # iniciante | intermediario | especialista
-    tone          : Mapped[str]      = mapped_column(String(50), nullable=False)
-    tags          : Mapped[list]     = mapped_column(JSON, default=list)            # ["História", "Séc. XX"]
+    subject         : Mapped[str]      = mapped_column(String(500), nullable=False)
+    original_prompt : Mapped[str]      = mapped_column(Text, nullable=False)
+    num_lessons     : Mapped[int]      = mapped_column(Integer, nullable=False)
+    level           : Mapped[str]      = mapped_column(String(50), nullable=False)   # iniciante | intermediario | especialista
+    tone            : Mapped[str]      = mapped_column(String(50), nullable=False)
+    tags            : Mapped[list]     = mapped_column(JSON, default=list)            # ["História", "Séc. XX"]
 
     # Progresso
     current_lesson: Mapped[int]      = mapped_column(Integer, default=0)           # índice 0-based da aula atual
@@ -114,6 +115,11 @@ class Lesson(Base):
     # Relacionamentos
     plan     : Mapped["StudyPlan"]       = relationship(back_populates="lessons")
     attempts : Mapped[list["QuizAttempt"]] = relationship(back_populates="lesson", cascade="all, delete-orphan")
+    comments: Mapped[list["LessonComment"]] = relationship(
+    back_populates="lesson",
+    cascade="all, delete-orphan",
+    order_by="LessonComment.created_at",
+    )
 
     __table_args__ = (
         UniqueConstraint("plan_id", "number", name="uq_plan_lesson_number"),
@@ -183,3 +189,22 @@ class PlanRating(Base):
 
     def __repr__(self) -> str:
         return f"<PlanRating {self.rating}★ plan={self.plan_id[:8]}>"
+
+# ─── LessonComment ────────────────────────────────────────────────────────────
+
+class LessonComment(Base):
+    """Comentários por aula — substitui o fórum com muito menos complexidade."""
+    __tablename__ = "lesson_comments"
+
+    id         : Mapped[str]      = mapped_column(String(36), primary_key=True, default=_uuid)
+    lesson_id  : Mapped[str]      = mapped_column(ForeignKey("lessons.id"), nullable=False, index=True)
+    user_id    : Mapped[str]      = mapped_column(ForeignKey("users.id"),   nullable=False, index=True)
+    content    : Mapped[str]      = mapped_column(Text, nullable=False)
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    # Relacionamentos
+    lesson : Mapped["Lesson"] = relationship(back_populates="comments")
+    user   : Mapped["User"]   = relationship()
+
+    def __repr__(self) -> str:
+        return f"<LessonComment user={self.user_id[:8]} lesson={self.lesson_id[:8]}>"
