@@ -1,7 +1,5 @@
-from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
-from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -18,30 +16,32 @@ class Settings(BaseSettings):
     cors_origins_raw: str = "http://localhost:3000"
 
     # Banco de dados
-    database_url: str = "sqlite+aiosqlite:///./edumotor.db"
+    database_url: str = "sqlite+aiosqlite:///./aprendai.db"
 
-    # JWT  ← estas três estavam faltando
-    secret_key: str = Field(
-        default="05a1964bf58b2624e66dd10a24b04b82d62a61c89d14191fd79316d57f5d2536",
-        validation_alias=AliasChoices("JWT_SECRET_KEY", "SECRET_KEY"),
-    )
-    algorithm: str = Field(
-        default="HS256",
-        validation_alias=AliasChoices("JWT_ALGORITHM", "ALGORITHM"),
-    )
-    access_token_expire_minutes: int = Field(
-        default=60 * 24 * 7,
-        validation_alias=AliasChoices("JWT_EXPIRE_MINUTES", "ACCESS_TOKEN_EXPIRE_MINUTES"),
-    )
+    # JWT
+    secret_key: str = "troque-isso-em-producao"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24 * 7
+
+    # Resend (email) ← NOVO
+    resend_api_key: str = ""
+    resend_from_email: str = "onboarding@resend.dev"
+
+    # Google OAuth ← NOVO
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/api/v1/auth/google/callback"
+
+    # URL do frontend ← NOVO (para redirects após OAuth)
+    frontend_url: str = "http://localhost:3000"
 
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.cors_origins_raw.split(",") if o.strip()]
 
     model_config = SettingsConfigDict(
-        env_file=str(Path(__file__).resolve().parents[3] / ".env"),
+        env_file=".env",
         env_file_encoding="utf-8",
-        extra="ignore",
     )
 
 

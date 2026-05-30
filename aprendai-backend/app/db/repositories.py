@@ -20,10 +20,23 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, email: str, name: str, hashed_pw: str, is_teacher: bool = False) -> User:
-        user = User(email=email, name=name, hashed_pw=hashed_pw, is_teacher=is_teacher)
+    async def create(
+        self,
+        email     : str,
+        name      : str,
+        hashed_pw : str,
+        is_teacher: bool = False,
+        google_id : str | None = None,
+    ) -> User:
+        user = User(
+            email      = email,
+            name       = name,
+            hashed_pw  = hashed_pw,
+            is_teacher = is_teacher,
+            google_id  = google_id,
+        )
         self.db.add(user)
-        await self.db.flush()   # Gera o ID sem commitar ainda
+        await self.db.flush()
         return user
 
     async def get_by_id(self, user_id: str) -> User | None:
@@ -323,3 +336,54 @@ class UsageRepository:
             )
         )
         return result.scalar_one() or 0
+    
+# ─── PasswordResetRepository ──────────────────────────────────────────────────
+
+class PasswordResetRepository:
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create_token(self, user_id: str) -> "PasswordResetToken":
+        import secrets
+        from datetime import timedelta
+        from app.db.models import PasswordResetToken
+
+        # Invalida tokens anteriores do mesmo usuário
+        await self._invalidate_previous(user_id)
+
+        token = PasswordResetToken(
+            user_id    = user_id,
+            token      = secrets.token_urlsafe(64),
+            expires_at = datetime.now(timezone.utc) + timedelta(hours=1),
+        )
+        self.db.add(token)
+        await self.db.flush()
+        return token
+
+    async def get_by_token(self, token: str):
+        from app.db.models import PasswordResetToken
+        result = await self.db.execute(
+            select(PasswordResetToken)
+            .where(PasswordResetToken.token == token)
+        )
+        return result.scalar_one_or_none()
+
+    async def mark_used(self, token_id: str):
+        from app.db.models import PasswordResetToken
+        await self.db.execute(
+            update(PasswordResetToken)
+            .where(PasswordResetToken.id == token_id)
+            .values(used=True)
+        )
+
+    async def _invalidate_previous(self, user_id: str):
+        from app.db.models import PasswordResetToken
+        await self.db.execute(
+            update(PasswordResetToken)
+            .where(
+                PasswordResetToken.user_id == user_id,
+                PasswordResetToken.used    == False,
+            )
+            .values(used=True)
+        )

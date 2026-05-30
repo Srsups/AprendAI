@@ -34,13 +34,14 @@ def _uuid() -> str:
 class User(Base):
     __tablename__ = "users"
 
-    id         :       Mapped[str]      = mapped_column(String(36), primary_key=True, default=_uuid)
-    email      :       Mapped[str]      = mapped_column(String(255), unique=True, nullable=False, index=True)
-    name       :       Mapped[str]      = mapped_column(String(255), nullable=False)
-    hashed_pw  :       Mapped[str]      = mapped_column(String(255), nullable=False)
-    is_teacher :       Mapped[bool]     = mapped_column(Boolean, default=False)
-    subscription_plan: Mapped[str]      = mapped_column(String(20), default="free", nullable=False)
-    created_at :       Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    id         :       Mapped[str]        = mapped_column(String(36), primary_key=True, default=_uuid)
+    email      :       Mapped[str]        = mapped_column(String(255), unique=True, nullable=False, index=True)
+    name       :       Mapped[str]        = mapped_column(String(255), nullable=False)
+    hashed_pw  :       Mapped[str]        = mapped_column(String(255), nullable=False)
+    is_teacher :       Mapped[bool]       = mapped_column(Boolean, default=False)
+    google_id  :       Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
+    subscription_plan: Mapped[str]        = mapped_column(String(20), default="free", nullable=False)
+    created_at :       Mapped[datetime]   = mapped_column(DateTime(timezone=True), default=_now)
 
     # Relacionamentos
     plans   : Mapped[list["StudyPlan"]]   = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -209,3 +210,25 @@ class LessonComment(Base):
 
     def __repr__(self) -> str:
         return f"<LessonComment user={self.user_id[:8]} lesson={self.lesson_id[:8]}>"
+    
+# ─── PasswordResetToken ───────────────────────────────────────────────────────
+
+class PasswordResetToken(Base):
+    """Token de recuperação de senha — expira em 1 hora e só pode ser usado uma vez."""
+    __tablename__ = "password_reset_tokens"
+
+    id         : Mapped[str]      = mapped_column(String(36),  primary_key=True, default=_uuid)
+    user_id    : Mapped[str]      = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    token      : Mapped[str]      = mapped_column(String(128), unique=True, nullable=False, index=True)
+    expires_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used       : Mapped[bool]     = mapped_column(Boolean, default=False)
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    user: Mapped["User"] = relationship()
+
+    @property
+    def is_valid(self) -> bool:
+        return not self.used and datetime.now(timezone.utc) < self.expires_at
+
+    def __repr__(self) -> str:
+        return f"<PasswordResetToken user={self.user_id[:8]} valid={self.is_valid}>"
