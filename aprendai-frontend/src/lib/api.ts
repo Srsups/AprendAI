@@ -142,5 +142,9 @@ export const commentsApi = {
 }
 
 export const usageApi = {
-  get: () => api.get('/api/v1/usage'),
+  get: () =>
+    api.get('/api/v1/usage'),
+
+  upgrade: (plan: 'free' | 'pro' | 'teacher' | 'institutional') =>
+    api.post('/api/v1/usage/upgrade', { plan }),
 }

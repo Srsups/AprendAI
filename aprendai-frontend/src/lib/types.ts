@@ -171,3 +171,24 @@ export interface UsageInfo {
   has_export_pptx   : boolean
   has_methodology   : boolean
 }
+
+// ─── Plans / Upgrade ──────────────────────────────────────────────────────────
+
+export type PlanId = 'free' | 'pro' | 'teacher' | 'institutional'
+
+export interface PlanFeature {
+  label    : string
+  included : boolean | string   // string para valores como "até 8 aulas"
+}
+
+export interface PlanDefinition {
+  id         : PlanId
+  name       : string
+  price      : string
+  period     : string
+  description: string
+  highlight  : boolean
+  badge      : string | null
+  features   : PlanFeature[]
+  cta        : string
+}

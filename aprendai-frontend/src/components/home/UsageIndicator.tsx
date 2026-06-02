@@ -120,7 +120,7 @@ export default function UsageIndicator({ onLimitReached }: Props) {
 
           {/* Botão de upgrade (só para free) */}
           {isFree && (
-            <Link href="/#planos" className="shrink-0">
+            <Link href="/upgrade" className="shrink-0">
               <Button
                 size="sm"
                 variant={limitReached ? 'default' : 'outline'}

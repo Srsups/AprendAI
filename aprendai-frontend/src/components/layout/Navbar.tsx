@@ -7,6 +7,10 @@ import { LayoutDashboard, LogOut, Compass, UserCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { isAuthenticated } from '@/lib/auth'
+import { Crown } from 'lucide-react'
+import { useQuery }  from '@tanstack/react-query'
+import { usageApi }  from '@/lib/api'
+import type { UsageInfo } from '@/lib/types'
 
 
 export default function Navbar() {
@@ -19,6 +23,13 @@ export default function Navbar() {
   }, [])
 
   const authed = mounted && isAuthenticated()
+
+  const { data: usage } = useQuery({
+    queryKey: ['usage'],
+    queryFn:  () => usageApi.get().then((r) => r.data as UsageInfo),
+    enabled:  authed,
+    staleTime: 1000 * 60 * 5,
+  })
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
@@ -60,6 +71,20 @@ export default function Navbar() {
                 >
                   <UserCircle size={14} />
                   Meu Perfil
+                </Button>
+              </Link>
+              <Link href="/upgrade">
+                <Button
+                  variant={pathname.startsWith('/upgrade') ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={`gap-2 transition-colors ${
+                    usage?.subscription_plan === 'free'
+                      ? 'text-primary hover:text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Crown size={14} />
+                  {usage?.subscription_plan === 'free' ? 'Upgrade' : 'Planos'}
                 </Button>
               </Link>
               <Button
