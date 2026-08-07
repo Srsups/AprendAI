@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
@@ -18,8 +18,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function Navbar() {
   const pathname = usePathname()
   const { logout } = useAuth()
-  const authed = isAuthenticated()
+  const [mounted, setMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const authed = mounted && isAuthenticated()
 
   const { data: usage } = useQuery({
     queryKey: ['usage'],
