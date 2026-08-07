@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { Download, BookOpen, Zap, Brain, MessageCircle } from 'lucide-react'
+import { Download, BookOpen, Zap, Brain, MessageCircle, Menu, X } from 'lucide-react'
 import { plansApi, assessmentApi, authApi } from '@/lib/api'
 import { usePlan } from '@/hooks/usePlan'
 import LessonSideBar from '@/components/plans/LessonSideBar'
@@ -30,6 +30,7 @@ export default function PlanDetailPage() {
   const [lessonContent, setLessonContent] = useState<LessonContentType | null>(null)
   const [activeTab,     setActiveTab]     = useState<Tab>('aula')
   const [showExport,    setShowExport]    = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // ── Queries ────────────────────────────────────────────────────────────────
   const { data: plan, isLoading } = useQuery({
@@ -129,7 +130,7 @@ export default function PlanDetailPage() {
       {/* Layout principal */}
       <div className="grid gap-6 md:grid-cols-[240px_1fr]">
 
-        {/* Sidebar */}
+        {/* Sidebar desktop */}
         <div className="hidden md:block">
           <LessonSideBar
             lessons={plan.lessons}
@@ -138,30 +139,79 @@ export default function PlanDetailPage() {
           />
         </div>
 
+        {/* Drawer mobile */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSidebarOpen(false)}
+                className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              />
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="fixed inset-y-0 left-0 z-50 w-72 overflow-y-auto border-r border-border bg-background p-4 md:hidden"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                    Aulas
+                  </span>
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <LessonSideBar
+                  lessons={plan.lessons}
+                  activeLesson={activeLesson}
+                  onSelect={(n) => { loadLesson(n); setSidebarOpen(false) }}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
         {/* Área principal */}
         <div className="min-h-[500px] rounded-2xl border border-border bg-card">
 
-          {/* Tabs */}
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <div className="flex gap-1">
+          {/* Tabs + botão de menu mobile */}
+          <div className="flex items-center justify-between border-b border-border px-3 py-3 md:px-4">
+            <div className="flex items-center gap-1">
+              {/* Botão menu mobile */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="mr-2 flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 font-mono text-xs text-muted-foreground hover:text-foreground md:hidden"
+              >
+                <Menu size={13} />
+                Aulas
+              </button>
+
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  disabled={(tab.id === 'quiz' || tab.id === 'flashcards') && !lessonContent}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-mono text-xs font-medium transition-all ${
+                  disabled={
+                    (tab.id === 'quiz' || tab.id === 'flashcards') && !lessonContent
+                  }
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-xs font-medium transition-all md:px-3 ${
                     activeTab === tab.id
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed'
                   }`}
                 >
                   <tab.icon size={12} />
-                  {tab.label}
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               ))}
             </div>
 
-            {/* Botão exportar */}
             {lessonContent && (
               <Button
                 variant="outline" size="sm"
@@ -169,13 +219,13 @@ export default function PlanDetailPage() {
                 onClick={() => setShowExport(true)}
               >
                 <Download size={12} />
-                Exportar
+                <span className="hidden sm:inline">Exportar</span>
               </Button>
             )}
           </div>
 
-          {/* Conteúdo da tab ativa */}
-          <div className="p-6">
+          {/* Conteúdo da tab */}
+          <div className="p-4 md:p-6">
             {activeTab === 'aula' && (
               <LessonContent
                 lesson={lessonContent}
@@ -183,7 +233,6 @@ export default function PlanDetailPage() {
                 lessonNumber={activeLesson}
               />
             )}
-
             {activeTab === 'quiz' && lessonContent && (
               <QuizView
                 planId={id}
@@ -192,11 +241,9 @@ export default function PlanDetailPage() {
                 level={plan.level}
               />
             )}
-
             {activeTab === 'flashcards' && lessonContent && (
               <FlashcardsView lessonText={lessonText} />
             )}
-
             {activeTab === 'discussao' && (
               <CommentsSection
                 planId={id}
@@ -204,18 +251,17 @@ export default function PlanDetailPage() {
                 userName={user?.name ?? 'Usuário'}
               />
             )}
-
           </div>
 
           {/* Navegação entre aulas */}
           {lessonContent && activeTab === 'aula' && (
-            <div className="flex items-center justify-between border-t border-border px-6 py-4">
+            <div className="flex items-center justify-between border-t border-border px-4 py-4 md:px-6">
               <Button
                 variant="ghost" size="sm"
                 disabled={activeLesson <= 1}
                 onClick={() => loadLesson(activeLesson - 1)}
               >
-                ← Anterior
+                ← <span className="hidden sm:inline ml-1">Anterior</span>
               </Button>
               <Button
                 variant={activeLesson < plan.num_lessons ? 'default' : 'ghost'}
@@ -224,7 +270,7 @@ export default function PlanDetailPage() {
                 onClick={() => loadLesson(activeLesson + 1)}
                 className={activeLesson < plan.num_lessons ? 'bg-primary text-primary-foreground' : ''}
               >
-                Próxima →
+                <span className="hidden sm:inline mr-1">Próxima</span> →
               </Button>
             </div>
           )}

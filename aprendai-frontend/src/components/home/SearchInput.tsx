@@ -71,75 +71,68 @@ export default function SearchInput({
 
   return (
     <div className="w-full space-y-3">
-      <div className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur-sm transition-all focus-within:border-primary/40 focus-within:shadow-[0_0_0_3px_rgba(200,240,96,0.05)]">
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ex: Quero 8 aulas sobre a Segunda Guerra Mundial, foque nas relações políticas e tratados…"
-          className="min-h-[90px] resize-none border-0 bg-transparent p-0 text-base placeholder:italic placeholder:text-muted-foreground focus-visible:ring-0"
-        />
+      <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        
+        {/* Chips com scroll horizontal no mobile */}
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-          <div className="flex flex-wrap gap-2">
-
-            {/* Nível */}
-            <div className="flex overflow-hidden rounded-lg border border-border">
-              {LEVELS.map((l) => (
-                <button key={l.value} onClick={() => setLevel(l.value)}
-                  className={`px-3 py-1.5 text-xs font-mono transition-all ${
-                    level === l.value
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  }`}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Tom */}
-            <div className="flex overflow-hidden rounded-lg border border-border">
-              {TONES.map((t) => (
-                <button key={t.value} onClick={() => setTone(t.value)}
-                  className={`px-3 py-1.5 text-xs font-mono transition-all ${
-                    tone === t.value
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Nº aulas */}
-            <div className="flex overflow-hidden rounded-lg border border-border">
-              {LESSON_OPTIONS.map((n) => (
-                <button key={n} onClick={() => setNumLessons(n)}
-                  className={`px-3 py-1.5 text-xs font-mono transition-all ${
-                    numLessons === n
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
+          {/* Nível */}
+          <div className="flex shrink-0 overflow-hidden rounded-lg border border-border sm:shrink">
+            {LEVELS.map((l) => (
+              <button key={l.value} onClick={() => setLevel(l.value)}
+                className={`px-3 py-1.5 text-xs font-mono transition-all whitespace-nowrap ${
+                  level === l.value
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
           </div>
 
-          <Button
-            onClick={handleGenerate}
-            disabled={generating || !prompt.trim() || limitReached}
-            className="gap-2 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            {generating
-              ? <><Loader2 size={15} className="animate-spin" /> Gerando…</>
-              : <><ArrowRight size={15} /> Gerar plano</>
-            }
-          </Button>
+          {/* Tom */}
+          <div className="flex shrink-0 overflow-hidden rounded-lg border border-border sm:shrink">
+            {TONES.map((t) => (
+              <button key={t.value} onClick={() => setTone(t.value)}
+                className={`px-3 py-1.5 text-xs font-mono transition-all whitespace-nowrap ${
+                  tone === t.value
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Nº aulas */}
+          <div className="flex shrink-0 overflow-hidden rounded-lg border border-border sm:shrink">
+            {LESSON_OPTIONS.map((n) => (
+              <button key={n} onClick={() => setNumLessons(n)}
+                className={`px-3 py-1.5 text-xs font-mono transition-all ${
+                  numLessons === n
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Botão — largura total no mobile */}
+        <Button
+          onClick={handleGenerate}
+          disabled={generating || !prompt.trim() || limitReached}
+          className="w-full gap-2 bg-primary font-semibold text-primary-foreground hover:bg-primary/90 sm:w-auto"
+        >
+          {generating
+            ? <><Loader2 size={15} className="animate-spin" /> Gerando…</>
+            : <><ArrowRight size={15} /> Gerar plano</>
+          }
+        </Button>
       </div>
 
       {error && (

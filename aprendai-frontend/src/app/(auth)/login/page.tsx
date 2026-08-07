@@ -16,12 +16,27 @@ export default function LoginPage() {
   const redirect     = searchParams.get('redirect') || '/dashboard'
   const urlError     = searchParams.get('error')
 
+  const googleErrorMessage = (() => {
+    switch (urlError) {
+      case 'google_config_missing':
+        return 'Configuração do Google ausente no backend. Verifique o .env.'
+      case 'google_invalid_client':
+        return 'Client OAuth do Google inválido ou inexistente no Google Cloud Console.'
+      case 'google_failed':
+      case 'google_auth_failed':
+      case 'google_user_failed':
+        return 'Erro ao autenticar com o Google. Tente novamente.'
+      case 'no_email':
+        return 'Sua conta Google não retornou um e-mail válido.'
+      default:
+        return null
+    }
+  })()
+
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(
-    urlError === 'google_failed' ? 'Erro ao autenticar com o Google. Tente novamente.' : null
-  )
+  const [error,    setError]    = useState<string | null>(googleErrorMessage)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,5 +1,11 @@
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+WORKSPACE_ROOT = BASE_DIR.parent
 
 
 class Settings(BaseSettings):
@@ -19,9 +25,18 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./aprendai.db"
 
     # JWT
-    secret_key: str = "troque-isso-em-producao"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60 * 24 * 7
+    secret_key: str = Field(
+        default="troque-isso-em-producao",
+        validation_alias=AliasChoices("JWT_SECRET_KEY", "SECRET_KEY"),
+    )
+    algorithm: str = Field(
+        default="HS256",
+        validation_alias=AliasChoices("JWT_ALGORITHM", "ALGORITHM"),
+    )
+    access_token_expire_minutes: int = Field(
+        default=60 * 24 * 7,
+        validation_alias=AliasChoices("JWT_EXPIRE_MINUTES", "ACCESS_TOKEN_EXPIRE_MINUTES"),
+    )
 
     # Resend (email) ← NOVO
     resend_api_key: str = ""
@@ -40,9 +55,26 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.cors_origins_raw.split(",") if o.strip()]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(WORKSPACE_ROOT / ".env", BASE_DIR / ".env"),
         env_file_encoding="utf-8",
     )
+
+    @model_validator(mode="after")
+    def validate_google_oauth(self):
+        placeholder_client_id = "seu_client_id.apps.googleusercontent.com"
+        placeholder_secret = "GOCSPX-seu_secret"
+
+        if self.google_client_id in {"", placeholder_client_id}:
+            raise ValueError(
+                "GOOGLE_CLIENT_ID não configurado. Substitua o valor de exemplo pelo client ID real do Google Cloud."
+            )
+
+        if self.google_client_secret in {"", placeholder_secret}:
+            raise ValueError(
+                "GOOGLE_CLIENT_SECRET não configurado. Substitua o valor de exemplo pelo secret real do Google Cloud."
+            )
+
+        return self
 
 
 @lru_cache()

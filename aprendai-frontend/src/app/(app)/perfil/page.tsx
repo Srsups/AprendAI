@@ -194,7 +194,7 @@ export default function PerfilPage() {
       </motion.div>
 
       {/* Estatísticas */}
-      <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-10 grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatCard icon={BookOpen}    label="Planos criados"    value={total}      delay={0.05} />
         <StatCard icon={CheckCircle2} label="Concluídos"       value={completed}  sub={total ? `${Math.round((completed/total)*100)}% do total` : undefined} delay={0.1} />
         <StatCard icon={Clock}       label="Em andamento"      value={inProgress} delay={0.15} />

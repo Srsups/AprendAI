@@ -192,7 +192,7 @@ export default function UpgradePage() {
       </motion.div>
 
       {/* Cards de planos */}
-      <div className="mb-16 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-16 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {PLANS.map((plan, i) => {
           const Icon      = ICONS[plan.id]
           const isCurrent = plan.id === currentPlan
@@ -303,43 +303,45 @@ export default function UpgradePage() {
         </h2>
 
         <div className="overflow-x-auto rounded-2xl border border-border">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="p-4 text-left font-mono text-xs text-muted-foreground">
-                  Recurso
-                </th>
-                {PLANS.map((plan) => (
-                  <th key={plan.id} className={`p-4 text-center font-semibold text-sm ${
-                    plan.id === currentPlan ? 'text-primary' : 'text-foreground'
-                  }`}>
-                    {plan.name}
-                    {plan.id === currentPlan && (
-                      <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 font-mono text-[10px] text-primary">
-                        atual
-                      </span>
-                    )}
+          <div className="min-w-[640px]">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="p-4 text-left font-mono text-xs text-muted-foreground">
+                    Recurso
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row, i) => (
-                <tr
-                  key={row.feature}
-                  className={`border-b border-border/50 transition-colors hover:bg-secondary/20 ${
-                    i % 2 === 0 ? '' : 'bg-secondary/10'
-                  }`}
-                >
-                  <td className="p-4 text-sm text-muted-foreground">{row.feature}</td>
-                  <td className="p-4 text-center"><FeatureValue value={row.free} /></td>
-                  <td className="p-4 text-center"><FeatureValue value={row.pro} /></td>
-                  <td className="p-4 text-center"><FeatureValue value={row.teacher} /></td>
-                  <td className="p-4 text-center"><FeatureValue value={row.institutional} /></td>
+                  {PLANS.map((plan) => (
+                    <th key={plan.id} className={`p-4 text-center font-semibold text-sm ${
+                      plan.id === currentPlan ? 'text-primary' : 'text-foreground'
+                    }`}>
+                      {plan.name}
+                      {plan.id === currentPlan && (
+                        <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 font-mono text-[10px] text-primary">
+                          atual
+                        </span>
+                      )}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {COMPARISON_ROWS.map((row, i) => (
+                  <tr
+                    key={row.feature}
+                    className={`border-b border-border/50 transition-colors hover:bg-secondary/20 ${
+                      i % 2 === 0 ? '' : 'bg-secondary/10'
+                    }`}
+                  >
+                    <td className="p-4 text-sm text-muted-foreground">{row.feature}</td>
+                    <td className="p-4 text-center"><FeatureValue value={row.free} /></td>
+                    <td className="p-4 text-center"><FeatureValue value={row.pro} /></td>
+                    <td className="p-4 text-center"><FeatureValue value={row.teacher} /></td>
+                    <td className="p-4 text-center"><FeatureValue value={row.institutional} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </motion.div>
 

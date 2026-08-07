@@ -34,6 +34,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|google-callback).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|google-callback|google_callback).*)',
   ],
 }

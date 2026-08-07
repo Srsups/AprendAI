@@ -217,7 +217,7 @@ export default function CommentsSection({ planId, lessonNumber, userName }: Prop
 
       {/* Lista de comentários */}
       {isLoading ? (
-        <div className="space-y-4 pl-11">
+        <div className="space-y-5 pl-0 sm:pl-11">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex gap-3">
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -232,12 +232,12 @@ export default function CommentsSection({ planId, lessonNumber, userName }: Prop
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="pl-11 text-sm text-muted-foreground"
+          className="pl-0 sm:pl-11 text-sm text-muted-foreground"
         >
           Nenhum comentário ainda. Seja o primeiro a comentar!
         </motion.div>
       ) : (
-        <div className="space-y-5 pl-11">
+        <div className="space-y-5 pl-0 sm:pl-11">
           <AnimatePresence initial={false}>
             {comments!.map((comment) => (
               <CommentCard

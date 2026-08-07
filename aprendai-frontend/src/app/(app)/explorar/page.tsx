@@ -229,14 +229,14 @@ export default function ExplorarPage() {
           Categorias
           <span className="h-px flex-1 bg-border" />
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0">
           {CATEGORIES.map((cat, i) => (
             <motion.button
               key={`${cat.label}-${i}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.04 }}
-              className="flex items-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-2 font-mono text-xs text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
+              className="flex shrink-0 items-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-2 font-mono text-xs text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/30 hover:text-primary hover:bg-primary/5"
             >
               <cat.icon size={13} />
               {cat.label}

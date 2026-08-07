@@ -144,9 +144,9 @@ export default function ExportModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 16 }}
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2"
+        className="fixed inset-x-0 bottom-0 z-50 sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:px-4"
       >
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-2xl">
+        <div className="rounded-t-2xl border-t border-border bg-card shadow-2xl sm:rounded-2xl sm:border">
 
           {/* Header */}
           <div className="mb-6 flex items-start justify-between">

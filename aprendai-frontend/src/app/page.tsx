@@ -133,7 +133,7 @@ function HeroSection() {
   }
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20">
+    <section className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
       <motion.div style={{ y, opacity }}
         className="relative z-10 mx-auto max-w-6xl text-center">
 
@@ -197,7 +197,7 @@ function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="mt-14 flex flex-wrap items-center justify-center gap-8 border-t border-border pt-10"
+          className="mt-14 grid grid-cols-2 gap-6 border-t border-border pt-10 sm:flex sm:flex-wrap sm:justify-center sm:gap-8"
         >
           {[
             { n: '12.400+', label: 'planos gerados' },
@@ -449,7 +449,7 @@ const PLANS = [
 function PricingSection() {
   return (
     <section id="planos" className="relative z-10 py-28">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <FadeUp className="mb-16 text-center">
           <Badge variant="outline" className="mb-4 font-mono text-xs">Planos</Badge>
           <h2 className="font-serif text-4xl font-bold md:text-5xl">

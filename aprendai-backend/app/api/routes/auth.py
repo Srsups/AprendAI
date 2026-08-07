@@ -36,6 +36,10 @@ GOOGLE_USER_URL  = "https://www.googleapis.com/oauth2/v2/userinfo"
 GOOGLE_SCOPES    = "openid email profile"
 
 
+def _google_oauth_failure_redirect(error: str) -> RedirectResponse:
+    return RedirectResponse(f"{settings.frontend_url}/login?error={error}")
+
+
 # ─── Email/senha ──────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
@@ -130,6 +134,9 @@ async def reset_password(body: ResetPasswordRequest, db: AsyncSession = Depends(
 @router.get("/google")
 async def google_login():
     """Redireciona para a página de autorização do Google."""
+    if not settings.google_client_id or not settings.google_client_secret:
+        return _google_oauth_failure_redirect("google_config_missing")
+
     params = {
         "client_id"    : settings.google_client_id,
         "redirect_uri" : settings.google_redirect_uri,
@@ -147,6 +154,9 @@ async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
     Recebe o código do Google, troca por token,
     busca/cria o usuário e redireciona para o frontend com o JWT.
     """
+    if not settings.google_client_id or not settings.google_client_secret:
+        return _google_oauth_failure_redirect("google_config_missing")
+
     async with httpx.AsyncClient() as client:
 
         # 1. Troca o código pelo access token
@@ -159,9 +169,16 @@ async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
         })
 
         if token_res.status_code != 200:
-            return RedirectResponse(
-                f"{settings.frontend_url}/login?error=google_auth_failed"
-            )
+            try:
+                token_error = token_res.json()
+            except ValueError:
+                token_error = {}
+
+            error_name = token_error.get("error")
+            if error_name == "invalid_client":
+                return _google_oauth_failure_redirect("google_invalid_client")
+
+            return _google_oauth_failure_redirect("google_auth_failed")
 
         access_token = token_res.json().get("access_token")
 
@@ -172,9 +189,7 @@ async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
         )
 
         if user_res.status_code != 200:
-            return RedirectResponse(
-                f"{settings.frontend_url}/login?error=google_user_failed"
-            )
+            return _google_oauth_failure_redirect("google_user_failed")
 
         google_data = user_res.json()
 
@@ -183,7 +198,7 @@ async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
     name      = google_data.get("name") or email.split("@")[0]
 
     if not email:
-        return RedirectResponse(f"{settings.frontend_url}/login?error=no_email")
+        return _google_oauth_failure_redirect("no_email")
 
     repo = UserRepository(db)
     user = await repo.get_by_email(email)
@@ -206,4 +221,4 @@ async def google_callback(code: str, db: AsyncSession = Depends(get_db)):
     jwt = create_access_token(user.id, user.email)
 
     # Redireciona para o frontend com o token na URL
-    return RedirectResponse(f"{settings.frontend_url}/google-callback?token={jwt}")
+    return RedirectResponse(f"{settings.frontend_url}/google_callback?token={jwt}")
