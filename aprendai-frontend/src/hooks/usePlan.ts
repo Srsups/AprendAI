@@ -43,7 +43,16 @@ export function usePlan() {
       const planId: string = saveRes.data.id
       return planId
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Erro ao gerar plano.')
+      const detail = err.response?.data?.detail || ''
+
+      // Mensagem específica para limite atingido
+      if (err.response?.status === 403) {
+        setError('Limite do plano atingido. Faça upgrade para continuar.')
+      } else if (err.response?.status === 401) {
+        setError('Sessão expirada. Faça login novamente.')
+      } else {
+        setError(detail || 'Erro ao gerar plano. Tente novamente.')
+      }
       return null
     } finally {
       setGenerating(false)

@@ -15,6 +15,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const redirect     = searchParams.get('redirect') || '/dashboard'
   const urlError     = searchParams.get('error')
+  const sessionExpired = searchParams.get('session') === 'expired'
 
   const googleErrorMessage = (() => {
     switch (urlError) {
@@ -36,7 +37,13 @@ export default function LoginPage() {
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(googleErrorMessage)
+  const [error, setError] = useState<string | null>(
+    sessionExpired
+      ? 'Sua sessão expirou. Faça login novamente.'
+      : urlError === 'google_failed'
+        ? 'Erro ao autenticar com o Google. Tente novamente.'
+        : null
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

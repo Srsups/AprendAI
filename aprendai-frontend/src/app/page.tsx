@@ -81,6 +81,7 @@ function LandingNav() {
             { label: 'Como funciona', href: '#como-funciona' },
             { label: 'Recursos',      href: '#recursos' },
             { label: 'Planos',        href: '#planos' },
+            { label: 'Sobre', href: '/sobre' },
           ].map((item) => (
             <a key={item.href} href={item.href}
               className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground">
@@ -145,7 +146,7 @@ function HeroSection() {
         >
           <Sparkles size={12} className="text-primary" />
           <span className="font-mono text-[11px] uppercase tracking-widest text-primary">
-            Powered by GitHub Models · gpt-4o
+            Powered by Azure AI Foundry · gpt-4o
           </span>
         </motion.div>
 
@@ -449,7 +450,7 @@ const PLANS = [
 function PricingSection() {
   return (
     <section id="planos" className="relative z-10 py-28">
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto max-w-6xl px-6">
         <FadeUp className="mb-16 text-center">
           <Badge variant="outline" className="mb-4 font-mono text-xs">Planos</Badge>
           <h2 className="font-serif text-4xl font-bold md:text-5xl">
@@ -462,7 +463,7 @@ function PricingSection() {
           </p>
         </FadeUp>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan, i) => (
             <FadeUp key={plan.name} delay={i * 0.08}>
               <div className={`relative flex h-full flex-col rounded-2xl border p-6 transition-all ${
@@ -665,20 +666,31 @@ function Footer() {
               title: 'Empresa',
               links: ['Sobre', 'Blog', 'Privacidade', 'Termos de uso'],
             },
+            
           ].map((col) => (
             <div key={col.title}>
               <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {col.title}
               </p>
               <ul className="space-y-2">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#"
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {col.links.map((link) => {
+                  const href =
+                    link === 'Sobre' ? '/sobre'       :
+                    link === 'Planos'          ? '/#planos'     :
+                    link === 'Como funciona'   ? '/#como-funciona' :
+                    link === 'Recursos'        ? '/#recursos'   :
+                    link === 'Explorar'        ? '/explorar'    :
+                    '#'
+
+                  return (
+                    <li key={link}>
+                      <a href={href}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                        {link}
+                      </a>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           ))}
@@ -689,7 +701,7 @@ function Footer() {
             © 2025 AprendAI. Projeto acadêmico — TCC.
           </p>
           <p className="font-mono text-xs text-muted-foreground">
-            Powered by GitHub Models · FastAPI · Next.js
+            Powered by Azure AI Foundry · FastAPI · Next.js
           </p>
         </div>
       </div>

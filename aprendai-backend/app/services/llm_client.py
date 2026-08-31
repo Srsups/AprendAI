@@ -1,12 +1,13 @@
 """
-Cliente para o GitHub Models (Azure OpenAI endpoint).
-Encapsula todas as chamadas à API com retry, timeout e parsing de JSON.
+Cliente para o Azure AI Foundry (Azure OpenAI).
+Usa o SDK openai com AzureOpenAI — mesma interface, endpoint diferente.
 """
 import json
 import logging
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
-from openai import AsyncOpenAI, APIError, RateLimitError, APITimeoutError
+from openai import AsyncAzureOpenAI, APIError, RateLimitError, APITimeoutError
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -19,12 +20,19 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 
 
-def _get_client() -> AsyncOpenAI:
-    """Cria o cliente OpenAI apontando para o GitHub Models."""
+def _azure_resource_endpoint(endpoint: str) -> str:
+    """Remove paths intended for the v1 OpenAI-compatible API."""
+    parsed = urlsplit(endpoint.rstrip("/"))
+    return urlunsplit((parsed.scheme, parsed.netloc, "", "", ""))
+
+
+def _get_client() -> AsyncAzureOpenAI:
+    """Cria o cliente Azure OpenAI."""
     settings = get_settings()
-    return AsyncOpenAI(
-        base_url=settings.github_models_endpoint,
-        api_key=settings.github_token,
+    return AsyncAzureOpenAI(
+        api_key  = settings.azure_openai_api_key,
+        azure_endpoint = _azure_resource_endpoint(settings.azure_openai_endpoint),
+        api_version    = settings.azure_openai_api_version,
     )
 
 
@@ -36,35 +44,28 @@ def _get_client() -> AsyncOpenAI:
 )
 async def call_model(
     system_prompt: str,
-    user_prompt: str,
-    max_tokens: int = 4096,
-    temperature: float = 0.3,
+    user_prompt  : str,
+    max_tokens   : int = 4096,
+    temperature  : float = 0.4,
 ) -> dict[str, Any]:
     """
-    Faz uma chamada ao GitHub Models e retorna o JSON parseado.
-
-    - Retry automático em RateLimit e Timeout (máx 3 tentativas).
-    - Temperatura baixa (0.3) para respostas mais determinísticas e factuais.
-    - Retorna dict Python com o conteúdo da resposta.
-
-    Raises:
-        ValueError: Se a resposta não for JSON válido.
-        APIError: Para erros da API não recuperáveis.
+    Chama o Azure AI Foundry e retorna o JSON parseado.
+    Retry automático em RateLimit e Timeout (máx 3 tentativas).
     """
     settings = get_settings()
     client   = _get_client()
 
-    logger.info(f"[LLM] Chamando modelo {settings.github_model} | max_tokens={max_tokens}")
+    logger.info(f"[LLM] Chamando deployment '{settings.azure_openai_deployment}' | max_tokens={max_tokens}")
 
     response = await client.chat.completions.create(
-        model=settings.github_model,
-        messages=[
+        model    = settings.azure_openai_deployment,   # nome do deployment no Azure
+        messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_prompt},
         ],
-        max_tokens=max_tokens,
-        temperature=temperature,
-        response_format={"type": "json_object"},  # Força JSON no gpt-4o
+        max_tokens      = max_tokens,
+        temperature     = temperature,
+        response_format = {"type": "json_object"},
     )
 
     raw = response.choices[0].message.content or ""
@@ -75,29 +76,25 @@ async def call_model(
 
 async def call_model_stream(
     system_prompt: str,
-    user_prompt: str,
-    max_tokens: int = 4096,
-    temperature: float = 0.4,
+    user_prompt  : str,
+    max_tokens   : int = 4096,
+    temperature  : float = 0.4,
 ):
-    """
-    Versão streaming do call_model.
-    Retorna um async generator de chunks de texto.
-    Útil para o endpoint SSE do conteúdo das aulas.
-    """
+    """Versão streaming — retorna async generator de chunks de texto."""
     settings = get_settings()
     client   = _get_client()
 
-    logger.info(f"[LLM STREAM] Iniciando stream | modelo={settings.github_model}")
+    logger.info(f"[LLM STREAM] Iniciando | deployment={settings.azure_openai_deployment}")
 
     stream = await client.chat.completions.create(
-        model=settings.github_model,
-        messages=[
+        model    = settings.azure_openai_deployment,
+        messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_prompt},
         ],
-        max_tokens=max_tokens,
-        temperature=temperature,
-        stream=True,
+        max_tokens = max_tokens,
+        temperature = temperature,
+        stream     = True,
     )
 
     async for chunk in stream:
@@ -107,13 +104,9 @@ async def call_model_stream(
 
 
 def _parse_json(raw: str) -> dict[str, Any]:
-    """
-    Tenta parsear o JSON da resposta.
-    Remove possíveis blocos ```json ... ``` que o modelo pode inserir.
-    """
+    """Parse seguro do JSON retornado pelo modelo."""
     cleaned = raw.strip()
 
-    # Remove fences se existirem
     if cleaned.startswith("```"):
         lines   = cleaned.split("\n")
         cleaned = "\n".join(lines[1:-1]) if lines[-1].strip() == "```" else "\n".join(lines[1:])
@@ -122,4 +115,4 @@ def _parse_json(raw: str) -> dict[str, Any]:
         return json.loads(cleaned)
     except json.JSONDecodeError as e:
         logger.error(f"[LLM] Falha ao parsear JSON: {e}\nRaw: {raw[:300]}")
-        raise ValueError(f"A IA retornou um formato inválido. Detalhe: {e}")
+        raise ValueError(f"A IA retornou um formato inválido: {e}")

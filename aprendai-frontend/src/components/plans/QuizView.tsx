@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, CheckCircle2, XCircle, RotateCcw, Trophy } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, RotateCcw, Trophy, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { assessmentApi } from '@/lib/api'
 import { toast } from 'sonner'
 import type { QuizResponse, QuizQuestion } from '@/lib/types'
+import EmptyState from '../shared/EmptyState'
 
 interface Props {
   planId: string
@@ -96,20 +97,13 @@ export default function QuizView({ planId, lessonNumber, lessonText, level }: Pr
   // ── Idle ──────────────────────────────────────────────────────────────────
   if (phase === 'idle') {
     return (
-      <div className="flex flex-col items-center gap-4 py-10 text-center">
-        <div className="rounded-2xl border border-border bg-secondary/30 p-4">
-          <Loader2 size={28} className="text-primary" />
-        </div>
-        <div>
-          <h3 className="font-serif text-lg font-bold">Testar o que aprendeu?</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            5 perguntas geradas a partir do conteúdo desta aula.
-          </p>
-        </div>
-        <Button onClick={startQuiz} className="gap-2 bg-primary text-primary-foreground">
-          Iniciar Quiz
-        </Button>
-      </div>
+      <EmptyState
+        icon={Zap}
+        title="Testar o que aprendeu?"
+        description="5 perguntas geradas exclusivamente a partir do conteúdo desta aula."
+        cta={{ label: 'Iniciar Quiz', onClick: startQuiz }}
+        compact
+      />
     )
   }
 

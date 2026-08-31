@@ -31,8 +31,10 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("  AprendAI Backend iniciando...")
     logger.info(f"  Ambiente : {settings.app_env}")
-    logger.info(f"  Modelo   : {settings.github_model}")
+    logger.info(f"  Modelo   : {settings.azure_openai_deployment}")
     logger.info(f"  Database : {settings.database_url}")
+    logger.info(f"  Deployment: {settings.azure_openai_deployment}")
+    logger.info(f"  Endpoint  : {settings.azure_openai_endpoint}")
     logger.info("=" * 60)
     yield
     logger.info("AprendAI Backend encerrando.")

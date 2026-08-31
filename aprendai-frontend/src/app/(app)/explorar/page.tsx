@@ -21,6 +21,8 @@ import {
   Palette, Cpu, FlaskConical, Music,
 } from 'lucide-react'
 import type { TrendingItem } from '@/lib/types'
+import ErrorState from '@/components/shared/ErrorState'
+import EmptyState from '@/components/shared/EmptyState'
 
 // ─── Coleções mockadas ────────────────────────────────────────────────────────
 // Futuramente virão do banco; por ora são estáticas para demonstrar o conceito
@@ -192,7 +194,7 @@ function CollectionCard({ col }: { col: typeof COLLECTIONS[0] }) {
 // ─── Página principal ──────────────────────────────────────────────────────────
 
 export default function ExplorarPage() {
-  const { data: trending, isLoading } = useQuery({
+  const { data: trending, isLoading, isError, refetch } = useQuery({
     queryKey: ['trending'],
     queryFn:  () => plansApi.trending().then((r) => r.data as TrendingItem[]),
   })
@@ -277,6 +279,15 @@ export default function ExplorarPage() {
           <span className="h-px flex-1 bg-border" />
         </p>
 
+        {isError && (
+          <ErrorState
+            title="Erro ao carregar trending"
+            description="Não foi possível buscar os temas mais populares."
+            onRetry={refetch}
+            compact
+          />
+        )}
+
         {isLoading ? (
           <div className="grid gap-3 md:grid-cols-2">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -284,17 +295,13 @@ export default function ExplorarPage() {
             ))}
           </div>
         ) : !trending?.length ? (
-          <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-            <TrendingUp size={28} className="mx-auto mb-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Ainda não há dados suficientes. Seja o primeiro a gerar planos!
-            </p>
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="mt-4">
-                Gerar meu primeiro plano
-              </Button>
-            </Link>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="Ainda sem dados"
+            description="Seja o primeiro a gerar planos e aparecer no trending!"
+            cta={{ label: 'Gerar meu primeiro plano', href: '/dashboard' }}
+            compact
+          />
         ) : (
           <motion.div
             variants={stagger}

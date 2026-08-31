@@ -40,7 +40,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       removeToken()
-      window.location.href = '/login'
+      const current = window.location.pathname
+      // Não redireciona se já está no login
+      if (!current.startsWith('/login') && !current.startsWith('/register')) {
+        window.location.href = `/login?session=expired&redirect=${encodeURIComponent(current)}`
+      }
     }
     return Promise.reject(error)
   }

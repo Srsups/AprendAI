@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { assessmentApi } from '@/lib/api'
 import { toast } from 'sonner'
 import type { FlashcardsResponse } from '@/lib/types'
+import EmptyState from '../shared/EmptyState'
 
 interface Props {
   lessonText: string
@@ -49,20 +50,13 @@ export default function FlashcardsView({ lessonText }: Props) {
   // ── Idle ───────────────────────────────────────────────────────────────────
   if (phase === 'idle') {
     return (
-      <div className="flex flex-col items-center gap-4 py-10 text-center">
-        <div className="rounded-2xl border border-border bg-secondary/30 p-4">
-          <Brain size={28} className="text-primary" />
-        </div>
-        <div>
-          <h3 className="font-serif text-lg font-bold">Memorizar com flashcards</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            10 cartões gerados a partir do conteúdo desta aula.
-          </p>
-        </div>
-        <Button onClick={start} className="gap-2 bg-primary text-primary-foreground">
-          Gerar Flashcards
-        </Button>
-      </div>
+      <EmptyState
+        icon={Brain}
+        title="Memorizar com flashcards"
+        description="10 cartões gerados a partir do conteúdo desta aula para spaced repetition."
+        cta={{ label: 'Gerar Flashcards', onClick: start }}
+        compact
+      />
     )
   }
 

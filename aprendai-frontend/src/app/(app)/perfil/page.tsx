@@ -14,6 +14,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 import type { StudyPlanListItem, User as UserType } from '@/lib/types'
+import ErrorState from '@/components/shared/ErrorState'
 
 // ─── Card de estatística ──────────────────────────────────────────────────────
 
@@ -132,7 +133,7 @@ function Avatar({ name, size = 'lg' }: { name: string; size?: 'sm' | 'lg' }) {
 // ─── Página principal ──────────────────────────────────────────────────────────
 
 export default function PerfilPage() {
-  const { data: user, isLoading: loadingUser } = useQuery({
+  const { data: user, isLoading: loadingUser, isError: userError } = useQuery({
     queryKey: ['me'],
     queryFn:  () => authApi.me().then((r) => r.data as UserType),
   })
@@ -192,6 +193,14 @@ export default function PerfilPage() {
           )}
         </div>
       </motion.div>
+
+      {userError && (
+        <ErrorState
+          title="Erro ao carregar perfil"
+          description="Não foi possível carregar seus dados."
+          compact
+        />
+      )}
 
       {/* Estatísticas */}
       <div className="mb-10 grid gap-3 grid-cols-2 lg:grid-cols-4">

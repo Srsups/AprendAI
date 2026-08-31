@@ -12,6 +12,7 @@ import { Input }  from '@/components/ui/input'
 import { toast }  from 'sonner'
 import { usageApi } from '@/lib/api'
 import type { PlanId, PlanDefinition } from '@/lib/types'
+import { notify } from '@/lib/toast'
 
 interface Props {
   plan   : PlanDefinition
@@ -51,9 +52,7 @@ export default function CheckoutModal({ plan, onClose, onSuccess }: Props) {
       setPhase('success')
       setTimeout(() => {
         onSuccess()
-        toast.success(`Plano ${plan.name} ativado!`, {
-          description: 'Aproveite todos os recursos desbloqueados.',
-        })
+        notify.upgradeDone(plan.name)
       }, 2000)
     } catch {
       toast.error('Erro ao processar pagamento. Tente novamente.')

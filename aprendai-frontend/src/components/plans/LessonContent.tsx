@@ -14,20 +14,44 @@ interface Props {
 export default function LessonContent({ lesson, loading, lessonNumber }: Props) {
   if (loading) {
     return (
-      <div className="space-y-6 p-6">
-        <div className="flex items-center gap-3">
-          <Loader2 size={16} className="animate-spin text-primary" />
-          <span className="font-mono text-sm text-muted-foreground">
+      <div className="space-y-8 p-6 md:p-8">
+        {/* Header skeleton */}
+        <div className="space-y-3 border-b border-border pb-6">
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-16 rounded-md" />
+            <Skeleton className="h-5 w-24 rounded-md" />
+          </div>
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-8 w-1/2" />
+        </div>
+
+        {/* Seções skeleton */}
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/6" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
+
+        {/* Conceitos-chave skeleton */}
+        <div className="rounded-xl border border-border p-5 space-y-3">
+          <Skeleton className="h-4 w-32" />
+          <div className="flex flex-wrap gap-2">
+            {[1,2,3,4].map((i) => <Skeleton key={i} className="h-6 w-20 rounded-full" />)}
+          </div>
+        </div>
+
+        {/* Indicador de geração */}
+        <div className="flex items-center justify-center gap-2 py-2">
+          <Loader2 size={14} className="animate-spin text-primary" />
+          <span className="font-mono text-xs text-muted-foreground">
             Gerando conteúdo com IA…
           </span>
         </div>
-        <Skeleton className="h-8 w-3/4" />
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-4/6" />
-        </div>
-        <Skeleton className="h-32 w-full" />
       </div>
     )
   }

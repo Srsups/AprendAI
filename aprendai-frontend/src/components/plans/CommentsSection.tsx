@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { commentsApi } from '@/lib/api'
 import type { Comment } from '@/lib/types'
+import { notify } from '@/lib/toast'
 
 interface Props {
   planId      : string
@@ -56,7 +57,7 @@ function CommentCard({
       queryClient.invalidateQueries({
         queryKey: ['comments', planId, lessonNumber],
       })
-      toast.success('Comentário removido.')
+      notify.commentDeleted()
     },
     onError: () => toast.error('Erro ao remover comentário.'),
   })

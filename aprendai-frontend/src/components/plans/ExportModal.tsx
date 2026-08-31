@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import { notify } from '@/lib/toast'
 
 interface Props {
   planId: string
@@ -109,9 +110,7 @@ export default function ExportModal({
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Exportação concluída!', {
-        description: `Arquivo ${format.toUpperCase()} baixado com sucesso.`,
-      })
+      notify.exportDone(format)
       onClose()
     } catch {
       toast.error('Erro ao exportar', {

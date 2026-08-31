@@ -18,6 +18,8 @@ import { Button }      from '@/components/ui/button'
 import { Badge }       from '@/components/ui/badge'
 import type { StudyPlanDetail, LessonContent as LessonContentType, User } from '@/lib/types'
 import CommentsSection from '@/components/plans/CommentsSection'
+import ErrorState from '@/components/shared/ErrorState'
+import { notify } from '@/lib/toast'
 
 type Tab = 'aula' | 'quiz' | 'flashcards' | 'discussao'
 
@@ -33,7 +35,7 @@ export default function PlanDetailPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // ── Queries ────────────────────────────────────────────────────────────────
-  const { data: plan, isLoading } = useQuery({
+  const { data: plan, isLoading, isError, refetch } = useQuery({
     queryKey: ['plan', id],
     queryFn:  () => plansApi.get(id).then((r) => r.data as StudyPlanDetail),
   })
@@ -61,7 +63,7 @@ export default function PlanDetailPage() {
   const rateMutation = useMutation({
     mutationFn: (rating: number) => assessmentApi.ratePlan(id, rating),
     onSuccess: () => {
-      toast.success('Avaliação salva!')
+      notify.ratingSaved()
       queryClient.invalidateQueries({ queryKey: ['plan', id] })
     },
   })
@@ -71,10 +73,22 @@ export default function PlanDetailPage() {
     ? lessonContent.sections.map((s) => `${s.heading}\n${s.body}`).join('\n\n')
     : ''
 
-  if (isLoading || !plan) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
+    )
+  }
+
+  if (isError || !plan) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-20">
+        <ErrorState
+          title="Plano não encontrado"
+          description="Este plano não existe ou você não tem acesso a ele."
+          onRetry={refetch}
+        />
       </div>
     )
   }

@@ -64,3 +64,37 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #2a2a26; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3a3a36; }
+
+/* Scroll suave global */
+html { scroll-behavior: smooth; }
+
+/* Seleção de texto com cor da marca */
+::selection {
+  background: rgba(200, 240, 96, 0.2);
+  color: #e8e8e2;
+}
+
+/* Focus ring com cor da marca */
+:focus-visible {
+  outline: 2px solid rgba(200, 240, 96, 0.5);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Transição suave em links e botões */
+a, button { transition-property: color, background-color, border-color, opacity, transform; transition-duration: 150ms; }
+
+/* Remove tap highlight no mobile */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Texto não selecionável em elementos de UI */
+.font-mono, nav, .no-select { user-select: none; }
+
+/* Scrollbar mais fina no Firefox */
+* { scrollbar-width: thin; scrollbar-color: #2a2a26 transparent; }
+
+/* Animação de entrada suave para todos os cards */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

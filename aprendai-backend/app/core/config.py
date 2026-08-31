@@ -9,10 +9,10 @@ WORKSPACE_ROOT = BASE_DIR.parent
 
 
 class Settings(BaseSettings):
-    # GitHub Models
-    github_token: str
-    github_models_endpoint: str = "https://models.inference.ai.azure.com"
-    github_model: str = "gpt-4o"
+    azure_openai_api_key  : str = ""
+    azure_openai_endpoint : str = "https://aprendai-resource.openai.azure.com"
+    azure_openai_deployment: str = "gpt-4o"
+    azure_openai_api_version: str = "2024-12-01-preview"
 
     # App
     app_env: str = "development"

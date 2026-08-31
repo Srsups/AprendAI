@@ -7,9 +7,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { BookOpen, CheckCircle2 } from 'lucide-react'
 import type { StudyPlanListItem } from '@/lib/types'
+import ErrorState from '@/components/shared/ErrorState'
+import EmptyState from '@/components/shared/EmptyState'
 
 export default function PlansPage() {
-  const { data: plans, isLoading } = useQuery({
+  const { data: plans, isLoading, isError, refetch } = useQuery({
     queryKey: ['plans'],
     queryFn: () => plansApi.list().then((r) => r.data as StudyPlanListItem[]),
   })
@@ -30,13 +32,12 @@ export default function PlansPage() {
           ))}
         </div>
       ) : plans?.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-          <BookOpen size={32} className="mx-auto mb-3 text-muted-foreground" />
-          <p className="text-muted-foreground">Você ainda não tem planos salvos.</p>
-          <Link href="/" className="mt-3 inline-block text-sm text-primary hover:underline">
-            Criar meu primeiro plano
-          </Link>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="Nenhum plano ainda"
+          description="Crie seu primeiro plano de estudos e comece a aprender com IA."
+          cta={{ label: 'Criar meu primeiro plano', href: '/dashboard' }}
+        />
       ) : (
         <div className="space-y-3">
           {plans?.map((plan) => (
@@ -70,6 +71,17 @@ export default function PlansPage() {
                       />
                     </div>
                   </div>
+
+                  if (isError) return (
+                    <div className="mx-auto max-w-3xl px-6 py-12">
+                      <ErrorState
+                        title="Erro ao carregar planos"
+                        description="Não foi possível buscar seus planos de estudo."
+                        onRetry={refetch}
+                      />
+                    </div>
+                  )
+
                 </div>
               </div>
             </Link>
